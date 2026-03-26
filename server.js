@@ -11,14 +11,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve the frontend files
-app.use(express.static(__dirname));
+// Force absolute pathing for static files (Fixes Render pathing issues)
+app.use(express.static(path.join(__dirname)));
 
 // --- ISOLATED DATABASE CONNECTION ---
 const mongoURI = process.env.MONGO_URI;
 
 if (!mongoURI) {
-    console.error('❌ ERROR: Missing MONGO_URI in .env file!');
+    console.warn('⚠️ WARNING: MONGO_URI missing in environment variables!');
 } else {
     mongoose.connect(mongoURI)
       .then(() => console.log('✅ Connected to VYSHNAV\'s Secure MongoDB Atlas Account'))
@@ -35,12 +35,6 @@ const MessageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', MessageSchema);
 
 // --- ROUTES ---
-// 1. Load the homepage
-app.get('/', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'index.html'));
-});
-
-// 2. Receive contact form transmissions
 app.post('/api/contact', async (req, res) => {
     try {
         const newMessage = new Message(req.body);
@@ -51,6 +45,11 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
+// Catch-all route guarantees the HTML loads
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // --- START SERVER ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Vyshnav Premium Portfolio running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Vyshnav Premium Portfolio running on port ${PORT}`));
