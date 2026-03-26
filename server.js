@@ -45,8 +45,8 @@ app.post('/api/contact', async (req, res) => {
     }
 });
 
-// Catch-all route guarantees the HTML loads
-app.get('*', (req, res) => {
+// Catch-all route guarantees the HTML loads (Updated for Express 5 compatibility)
+app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
